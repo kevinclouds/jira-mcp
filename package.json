@@ -1,0 +1,34 @@
+{
+  "name": "jira-mcp",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "license": "MIT",
+  "description": "A local stdio MCP server for Jira Server REST API v2",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kevinclouds/jira-mcp.git"
+  },
+  "bin": {
+    "jira-mcp": "dist/index.mjs"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "prepare": "node scripts/build.mjs",
+    "start": "node src/index.mjs",
+    "release-check": "sh scripts/release-check.sh"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "README.zh-CN.md"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.3.1",
+    "zod": "^4.6.7"
+  }
+}
