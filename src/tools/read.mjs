@@ -11,7 +11,7 @@ const page = {
 export function registerReadTools(server, { client, config }) {
   server.registerTool('jira_search_issues', {
     title: 'Search Issues',
-    description: 'Search Jira issues with JQL.',
+    description: 'Search Jira issues with JQL, e.g. "project = KEY AND assignee = currentUser()". Omit fields to return all fields (can be large; pass fields to limit). expand takes an array.',
     inputSchema: z.strictObject({
       jql: z.string().describe('JQL expression'),
       fields: z.array(z.string()).optional().describe('Fields to return; omitted returns all fields'),
@@ -80,7 +80,7 @@ export function registerReadTools(server, { client, config }) {
 
   server.registerTool('jira_get_issue_transitions', {
     title: 'Get Issue Transitions',
-    description: 'List available transitions for an issue.',
+    description: 'List available transitions for an issue. Use expand=transitions.fields to see the fields each transition screen requires.',
     inputSchema: z.strictObject({
       issueKey: z.string().describe('Issue key'),
       transitionId: z.string().optional().describe('Return a single transition by ID'),
@@ -106,7 +106,7 @@ export function registerReadTools(server, { client, config }) {
 
   server.registerTool('jira_list_projects', {
     title: 'List Projects',
-    description: 'List visible Jira projects.',
+    description: 'List visible Jira projects. Pagination (startAt/maxResults) is applied locally — the Jira endpoint itself returns all projects.',
     inputSchema: z.strictObject({
       expand: z.string().optional().describe('e.g. description,lead,url,projectKeys'),
       recent: z.number().int().min(1).optional().describe('Return the N most recently viewed projects'),
@@ -167,7 +167,7 @@ export function registerReadTools(server, { client, config }) {
 
   server.registerTool('jira_list_users', {
     title: 'Search Users',
-    description: 'Search users.',
+    description: 'Search users — use this to find usernames for assignee fields.',
     inputSchema: z.strictObject({
       username: z.string().optional().describe('Username or query'),
       includeActive: z.boolean().optional().describe('Include active users'),
@@ -240,7 +240,7 @@ export function registerReadTools(server, { client, config }) {
 
   server.registerTool('jira_get_create_meta', {
     title: 'Get Create Metadata',
-    description: 'Get create-issue field metadata for projects and issue types.',
+    description: 'Get create-issue field metadata for projects and issue types. Use before jira_create_issue to check available and required fields.',
     inputSchema: z.strictObject({
       projectKeys: z.string().optional().describe('Comma-separated project keys'),
       projectIds: z.string().optional().describe('Comma-separated project IDs'),
@@ -262,7 +262,7 @@ export function registerReadTools(server, { client, config }) {
 
   server.registerTool('jira_get_edit_meta', {
     title: 'Get Edit Metadata',
-    description: 'Get editable fields for an issue.',
+    description: 'Get editable fields for an issue. Use before jira_update_issue to check which fields can be set.',
     inputSchema: z.strictObject({ issueKey: z.string().describe('Issue key') }),
     annotations: annotations(),
   }, withTool('jira_get_edit_meta', async (args) => {
@@ -278,7 +278,7 @@ export function registerReadTools(server, { client, config }) {
 
   server.registerTool('jira_download_attachment', {
     title: 'Download Attachment',
-    description: 'Download attachment content as base64.',
+    description: 'Download attachment content as base64. Only attachments hosted on the configured Jira instance are allowed.',
     inputSchema: z.strictObject({ attachmentId: z.string().describe('Attachment ID') }),
     annotations: annotations(),
   }, withTool('jira_download_attachment', async (args) => {

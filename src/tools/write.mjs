@@ -8,7 +8,7 @@ export function registerWriteTools(server, { client, guard, config }) {
 
   server.registerTool('jira_create_issue', {
     title: 'Create Issue',
-    description: 'Create a Jira issue. Use jira_get_create_meta to list the available fields for the project and issue type.',
+    description: 'Create a Jira issue. Use jira_get_create_meta to list the available fields for the project and issue type. Attachments and links are added afterwards via jira_upload_attachment / jira_link_issues.',
     inputSchema: z.strictObject({
       projectKey: z.string().describe('Project key'),
       issueType: z.string().describe('Issue type name'),
@@ -59,7 +59,7 @@ export function registerWriteTools(server, { client, guard, config }) {
 
   server.registerTool('jira_update_issue', {
     title: 'Update Issue',
-    description: 'Update Jira issue fields. Use jira_get_edit_meta to list the editable fields of the issue.',
+    description: "Update Jira issue fields. Fields must be on the issue's edit screen — use jira_get_edit_meta to list editable fields. The issue type can also be changed via fields (issuetype: { id }, ids from jira_list_issue_types). The resolution is usually not editable here; set it through a transition instead.",
     inputSchema: z.strictObject({
       issueKey: z.string().describe('Issue key'),
       fields: z.record(z.string(), z.unknown()).describe('Jira fields object'),
@@ -224,7 +224,7 @@ export function registerWriteTools(server, { client, guard, config }) {
 
   server.registerTool('jira_add_worklog', {
     title: 'Add Worklog',
-    description: 'Add a worklog entry to an issue.',
+    description: 'Add a worklog entry to an issue. adjustEstimate: leave = keep the remaining estimate; auto = reduce it by the logged time (default); manual = set newEstimate; reduce = subtract reduceBy.',
     inputSchema: z.strictObject({
       issueKey: z.string().describe('Issue key'),
       timeSpent: z.string().describe('Time spent, e.g. 1h 30m'),
@@ -254,7 +254,7 @@ export function registerWriteTools(server, { client, guard, config }) {
 
   server.registerTool('jira_link_issues', {
     title: 'Link Issues',
-    description: 'Create a link between two issues.',
+    description: 'Create a link between two issues. linkType names are listed by jira_get_issue_link_types.',
     inputSchema: z.strictObject({
       inwardIssue: z.string().describe('Inward issue key'),
       outwardIssue: z.string().describe('Outward issue key'),
@@ -298,7 +298,7 @@ export function registerWriteTools(server, { client, guard, config }) {
 
   server.registerTool('jira_transition_issue', {
     title: 'Transition Issue',
-    description: 'Transition an issue to another status.',
+    description: 'Transition an issue to another status. Fields required by the transition screen (query jira_get_issue_transitions with expand=transitions.fields) are passed via fields — this is also how a resolution is set when resolving or closing (resolution: { name: "<name>" }, names depend on the instance).',
     inputSchema: z.strictObject({
       issueKey: z.string().describe('Issue key'),
       transitionId: z.string().describe('Transition ID (query with jira_get_issue_transitions)'),
