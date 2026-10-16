@@ -9,7 +9,7 @@ Verified against Jira Server 8.13.5. Jira Cloud is only partially compatible (AP
 ## Features
 
 - **41 tools** — 22 read-only, 16 write, 3 delete (see [Tools](#tools))
-- **Read-only by default** — writes require `--allow-write`, deletes require `--allow-write --allow-delete`
+- **Read-only by default** — set `JIRA_ALLOW_WRITE=true` for writes and `JIRA_ALLOW_DELETE=true` for deletes
 - **Safe by design** — the server never bypasses Jira permissions; 401/403/404 are mapped to explicit error codes with suggestions
 - **Basic auth with session fallback** — automatically falls back to session-cookie auth when Basic auth is rejected
 - **Field discovery helpers** — `jira_get_create_meta` / `jira_get_edit_meta` list the fields available on your project screens
@@ -31,11 +31,13 @@ Standard configuration (works in most clients):
   "mcpServers": {
     "jira": {
       "command": "npx",
-      "args": ["-y", "github:kevinclouds/jira-mcp#v0.1.0"],
+      "args": ["-y", "--package=github:kevinclouds/jira-mcp#v0.1.0", "jira-mcp"],
       "env": {
         "JIRA_URL": "https://jira.example.com",
         "JIRA_USERNAME": "your-username",
-        "JIRA_PASSWORD": "your-password"
+        "JIRA_PASSWORD": "your-password",
+        "JIRA_ALLOW_WRITE": "true",
+        "JIRA_ALLOW_DELETE": "true"
       }
     }
   }
@@ -52,7 +54,7 @@ claude mcp add jira \
   -e JIRA_URL=https://jira.example.com \
   -e JIRA_USERNAME=your-username \
   -e JIRA_PASSWORD=your-password \
-  -- npx -y github:kevinclouds/jira-mcp#v0.1.0
+  -- npx -y --package=github:kevinclouds/jira-mcp#v0.1.0 jira-mcp
 ```
 </details>
 
@@ -64,12 +66,14 @@ Add to `~/.codex/config.toml`:
 ```toml
 [mcp_servers.jira]
 command = "npx"
-args = ["-y", "github:kevinclouds/jira-mcp#v0.1.0"]
+args = ["-y", "--package=github:kevinclouds/jira-mcp#v0.1.0", "jira-mcp"]
 
 [mcp_servers.jira.env]
 JIRA_URL = "https://jira.example.com"
 JIRA_USERNAME = "your-username"
 JIRA_PASSWORD = "your-password"
+JIRA_ALLOW_WRITE = "true"
+JIRA_ALLOW_DELETE = "true"
 ```
 </details>
 
@@ -83,11 +87,13 @@ Add to `.vscode/mcp.json`:
   "servers": {
     "jira": {
       "command": "npx",
-      "args": ["-y", "github:kevinclouds/jira-mcp#v0.1.0"],
+      "args": ["-y", "--package=github:kevinclouds/jira-mcp#v0.1.0", "jira-mcp"],
       "env": {
         "JIRA_URL": "https://jira.example.com",
         "JIRA_USERNAME": "your-username",
-        "JIRA_PASSWORD": "your-password"
+        "JIRA_PASSWORD": "your-password",
+        "JIRA_ALLOW_WRITE": "true",
+        "JIRA_ALLOW_DELETE": "true"
       }
     }
   }
@@ -106,11 +112,13 @@ Add to `~/.config/opencode/opencode.json`:
   "mcp": {
     "jira": {
       "type": "local",
-      "command": ["npx", "-y", "github:kevinclouds/jira-mcp#v0.1.0"],
+      "command": ["npx", "-y", "--package=github:kevinclouds/jira-mcp#v0.1.0", "jira-mcp"],
       "environment": {
         "JIRA_URL": "https://jira.example.com",
         "JIRA_USERNAME": "your-username",
-        "JIRA_PASSWORD": "your-password"
+        "JIRA_PASSWORD": "your-password",
+        "JIRA_ALLOW_WRITE": "true",
+        "JIRA_ALLOW_DELETE": "true"
       }
     }
   }
@@ -136,7 +144,9 @@ npm install        # installs the MCP SDK and builds dist via prepare
       "env": {
         "JIRA_URL": "https://jira.example.com",
         "JIRA_USERNAME": "your-username",
-        "JIRA_PASSWORD": "your-password"
+        "JIRA_PASSWORD": "your-password",
+        "JIRA_ALLOW_WRITE": "true",
+        "JIRA_ALLOW_DELETE": "true"
       }
     }
   }
@@ -153,21 +163,21 @@ npm install        # installs the MCP SDK and builds dist via prepare
 | `JIRA_URL` | Jira base URL |
 | `JIRA_USERNAME` | Account username |
 | `JIRA_PASSWORD` | Account password (API token on Jira Cloud) |
+| `JIRA_ALLOW_WRITE` | Set to `true` to register the 16 write tools |
+| `JIRA_ALLOW_DELETE` | Set to `true` to register the 3 delete tools (write tools must also be enabled) |
 
-### CLI arguments (compatible, higher priority than env vars)
+### CLI arguments
 
 | Argument | Description |
 |---|---|
 | `--url` / `--username` / `--password` | Same as the env vars above |
-| `--allow-write` | Register the 16 write tools |
-| `--allow-delete` | With `--allow-write`, register the 3 delete tools |
 | `--no-session-fallback` | Disable session-cookie fallback on 401 |
 
-Note: CLI arguments may be visible in process listings — prefer environment variables.
+Write and delete permissions are controlled only through the environment variables above. CLI permission flags are not supported.
 
 ## Tools
 
-Full JSON schemas are discoverable via `tools/list`. Read-only tools are registered by default; write tools require `--allow-write`; delete tools require `--allow-write --allow-delete`.
+Full JSON schemas are discoverable via `tools/list`. Read-only tools are registered by default; set `JIRA_ALLOW_WRITE=true` for write tools and `JIRA_ALLOW_DELETE=true` for delete tools.
 
 <details>
 <summary><b>Read-only (22)</b></summary>
@@ -197,7 +207,7 @@ Full JSON schemas are discoverable via `tools/list`. Read-only tools are registe
 </details>
 
 <details>
-<summary><b>Write (16, requires --allow-write)</b></summary>
+<summary><b>Write (16, requires JIRA_ALLOW_WRITE=true)</b></summary>
 
 - `jira_create_issue` — Create an issue (full field set, incl. custom fields)
 - `jira_update_issue` — Update issue fields
@@ -218,7 +228,7 @@ Full JSON schemas are discoverable via `tools/list`. Read-only tools are registe
 </details>
 
 <details>
-<summary><b>Delete (3, requires --allow-write --allow-delete)</b></summary>
+<summary><b>Delete (3, requires JIRA_ALLOW_WRITE=true and JIRA_ALLOW_DELETE=true)</b></summary>
 
 - `jira_delete_issue` — Delete an issue
 - `jira_delete_comment` — Delete a comment

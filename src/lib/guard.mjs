@@ -4,7 +4,7 @@ export class WriteGuard {
   }
 
   assertEnabled(operation) {
-    if (!this.config.allowWrite) throw new Error('Write operations are disabled. Start the server with --allow-write.');
-    if (operation === 'delete' && !this.config.allowDelete) throw new Error('Delete operations are disabled. Start the server with --allow-delete.');
+    if (!this.config.allowWrite) throw new Error('Write operations are disabled. Set JIRA_ALLOW_WRITE=true.');
+    if (operation === 'delete' && !this.config.allowDelete) throw new Error('Delete operations are disabled. Set JIRA_ALLOW_DELETE=true.');
   }
 }

@@ -9,7 +9,7 @@
 ## 特性
 
 - **41 个工具**——22 个只读、16 个写入、3 个删除（见[工具清单](#工具)）
-- **默认只读**——写入需要 `--allow-write`，删除需要 `--allow-write --allow-delete`
+- **默认只读**——设置 `JIRA_ALLOW_WRITE=true` 启用写入，设置 `JIRA_ALLOW_DELETE=true` 启用删除
 - **安全设计**——不绕过 Jira 权限；401/403/404 映射为明确错误码与处理建议
 - **Basic Auth + Session 回退**——Basic 被拒时自动回退到 Session Cookie 认证
 - **字段发现工具**——`jira_get_create_meta` / `jira_get_edit_meta` 可查询项目屏幕上可用的字段
@@ -31,11 +31,13 @@
   "mcpServers": {
     "jira": {
       "command": "npx",
-      "args": ["-y", "github:kevinclouds/jira-mcp#v0.1.0"],
+      "args": ["-y", "--package=github:kevinclouds/jira-mcp#v0.1.0", "jira-mcp"],
       "env": {
         "JIRA_URL": "https://jira.example.com",
         "JIRA_USERNAME": "your-username",
-        "JIRA_PASSWORD": "your-password"
+        "JIRA_PASSWORD": "your-password",
+        "JIRA_ALLOW_WRITE": "true",
+        "JIRA_ALLOW_DELETE": "true"
       }
     }
   }
@@ -52,7 +54,7 @@ claude mcp add jira \
   -e JIRA_URL=https://jira.example.com \
   -e JIRA_USERNAME=your-username \
   -e JIRA_PASSWORD=your-password \
-  -- npx -y github:kevinclouds/jira-mcp#v0.1.0
+  -- npx -y --package=github:kevinclouds/jira-mcp#v0.1.0 jira-mcp
 ```
 </details>
 
@@ -64,12 +66,14 @@ claude mcp add jira \
 ```toml
 [mcp_servers.jira]
 command = "npx"
-args = ["-y", "github:kevinclouds/jira-mcp#v0.1.0"]
+args = ["-y", "--package=github:kevinclouds/jira-mcp#v0.1.0", "jira-mcp"]
 
 [mcp_servers.jira.env]
 JIRA_URL = "https://jira.example.com"
 JIRA_USERNAME = "your-username"
 JIRA_PASSWORD = "your-password"
+JIRA_ALLOW_WRITE = "true"
+JIRA_ALLOW_DELETE = "true"
 ```
 </details>
 
@@ -83,11 +87,13 @@ JIRA_PASSWORD = "your-password"
   "servers": {
     "jira": {
       "command": "npx",
-      "args": ["-y", "github:kevinclouds/jira-mcp#v0.1.0"],
+      "args": ["-y", "--package=github:kevinclouds/jira-mcp#v0.1.0", "jira-mcp"],
       "env": {
         "JIRA_URL": "https://jira.example.com",
         "JIRA_USERNAME": "your-username",
-        "JIRA_PASSWORD": "your-password"
+        "JIRA_PASSWORD": "your-password",
+        "JIRA_ALLOW_WRITE": "true",
+        "JIRA_ALLOW_DELETE": "true"
       }
     }
   }
@@ -106,11 +112,13 @@ JIRA_PASSWORD = "your-password"
   "mcp": {
     "jira": {
       "type": "local",
-      "command": ["npx", "-y", "github:kevinclouds/jira-mcp#v0.1.0"],
+      "command": ["npx", "-y", "--package=github:kevinclouds/jira-mcp#v0.1.0", "jira-mcp"],
       "environment": {
         "JIRA_URL": "https://jira.example.com",
         "JIRA_USERNAME": "your-username",
-        "JIRA_PASSWORD": "your-password"
+        "JIRA_PASSWORD": "your-password",
+        "JIRA_ALLOW_WRITE": "true",
+        "JIRA_ALLOW_DELETE": "true"
       }
     }
   }
@@ -136,7 +144,9 @@ npm install        # 安装 MCP SDK 依赖，并通过 prepare 构建 dist
       "env": {
         "JIRA_URL": "https://jira.example.com",
         "JIRA_USERNAME": "your-username",
-        "JIRA_PASSWORD": "your-password"
+        "JIRA_PASSWORD": "your-password",
+        "JIRA_ALLOW_WRITE": "true",
+        "JIRA_ALLOW_DELETE": "true"
       }
     }
   }
@@ -153,21 +163,21 @@ npm install        # 安装 MCP SDK 依赖，并通过 prepare 构建 dist
 | `JIRA_URL` | Jira 地址 |
 | `JIRA_USERNAME` | 账号 |
 | `JIRA_PASSWORD` | 密码（Cloud 场景为 API Token） |
+| `JIRA_ALLOW_WRITE` | 设置为 `true` 注册 16 个写入工具 |
+| `JIRA_ALLOW_DELETE` | 设置为 `true` 注册 3 个删除工具（还必须启用写入工具） |
 
-### CLI 参数（兼容，优先级高于环境变量）
+### CLI 参数
 
 | 参数 | 说明 |
 |---|---|
 | `--url` / `--username` / `--password` | 同上方环境变量 |
-| `--allow-write` | 注册 16 个写入工具 |
-| `--allow-delete` | 配合 `--allow-write` 注册 3 个删除工具 |
 | `--no-session-fallback` | 关闭 401 时的 Session 回退 |
 
-注意：CLI 参数可能出现在进程列表中，正式使用推荐环境变量。
+写入和删除权限只通过上述环境变量控制，不再支持 CLI 权限参数。
 
 ## 工具
 
-完整 JSON Schema 可通过 `tools/list` 获取。只读工具默认注册；写入工具需要 `--allow-write`；删除工具需要 `--allow-write --allow-delete`。
+完整 JSON Schema 可通过 `tools/list` 获取。只读工具默认注册；设置 `JIRA_ALLOW_WRITE=true` 启用写入工具，设置 `JIRA_ALLOW_DELETE=true` 启用删除工具。
 
 <details>
 <summary><b>只读（22）</b></summary>
@@ -197,7 +207,7 @@ npm install        # 安装 MCP SDK 依赖，并通过 prepare 构建 dist
 </details>
 
 <details>
-<summary><b>写入（16，需 --allow-write）</b></summary>
+<summary><b>写入（16，需 JIRA_ALLOW_WRITE=true）</b></summary>
 
 - `jira_create_issue` — 创建 Issue（全字段，含自定义字段）
 - `jira_update_issue` — 更新 Issue 字段
@@ -218,7 +228,7 @@ npm install        # 安装 MCP SDK 依赖，并通过 prepare 构建 dist
 </details>
 
 <details>
-<summary><b>删除（3，需 --allow-write --allow-delete）</b></summary>
+<summary><b>删除（3，需 JIRA_ALLOW_WRITE=true 和 JIRA_ALLOW_DELETE=true）</b></summary>
 
 - `jira_delete_issue` — 删除 Issue
 - `jira_delete_comment` — 删除评论

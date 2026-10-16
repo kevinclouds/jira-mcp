@@ -22,6 +22,6 @@ else
   echo 'No RELEASE_FORBIDDEN_REGEX supplied; pass company-specific patterns during release.'
 fi
 
-# npm audit requires the official registry (mirrors often lack the audit endpoint)
-npm audit --audit-level=high --registry=https://registry.npmjs.org
+NPM_REGISTRY="${NPM_REGISTRY:-https://registry.npmmirror.com}"
+npm audit --audit-level=high --registry="$NPM_REGISTRY"
 echo 'Release checks passed. Enable GitHub Secret Scanning before publishing.'

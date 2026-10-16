@@ -1,5 +1,9 @@
 const VALUE_FLAGS = new Set(['--url', '--username', '--password']);
 
+function readBooleanEnv(env, name) {
+  return String(env[name] ?? '').toLowerCase() === 'true';
+}
+
 function readFlag(argv, name) {
   const exact = argv.indexOf(name);
   if (exact >= 0) return argv[exact + 1];
@@ -22,8 +26,8 @@ export function loadConfig(argv = [], env = process.env) {
   if (!values.password) throw new Error('JIRA_PASSWORD or --password is required');
   return {
     ...values,
-    allowWrite: argv.includes('--allow-write'),
-    allowDelete: argv.includes('--allow-delete'),
+    allowWrite: readBooleanEnv(env, 'JIRA_ALLOW_WRITE'),
+    allowDelete: readBooleanEnv(env, 'JIRA_ALLOW_DELETE'),
     sessionFallback: !argv.includes('--no-session-fallback'),
   };
 }
